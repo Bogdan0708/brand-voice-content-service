@@ -18,7 +18,7 @@ platforms:
     hashtag_count: "2-3"
     emoji_usage: "minimal"
   twitter:
-    character_limit: 280 sent
+    character_limit: 280
     hashtag_count: "2-3"
     emoji_usage: "moderate"
   tiktok:
