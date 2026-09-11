@@ -3,7 +3,6 @@ from pathlib import Path
 import sys
 import os
 import pytest
-import httpx
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -13,15 +12,13 @@ BASE_DIR = Path(__file__).resolve().parents[1]
 sys.path.append(str(BASE_DIR / "libs" / "common"))
 sys.path.append(str(BASE_DIR / "services" / "social-analytics" / "instagram"))
 
-from common.auth import verify_token
-
 os.environ.setdefault("ANTHROPIC_API_KEY", "test-api-key")
 os.environ.setdefault("JWT_SECRET_KEY", "test-jwt-secret")
 os.environ.setdefault("ENABLE_METRICS", "0")
 os.environ.setdefault("SKIP_STARTUP_CHECKS", "1")
 
-from common.auth import create_access_token
-from common.models import Base
+from common.auth import create_access_token  # noqa: E402
+from common.models import Base  # noqa: E402
 
 # Import Instagram service as package (uses relative imports)
 instagram_main = import_module("app.main")

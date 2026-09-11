@@ -2,7 +2,7 @@ import asyncio
 import json
 import pytest
 
-from tests.conftest import FakeRedis, instagram_app, instagram_deps
+from tests.conftest import FakeRedis
 from common.models import InstagramMedia
 from app.main import health, ingest_media, account_metrics
 
