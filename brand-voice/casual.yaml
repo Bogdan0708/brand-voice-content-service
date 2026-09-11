@@ -1,0 +1,27 @@
+tone: "Friendly and relaxed"
+style_elements:
+  - "Conversational"
+  - "Playful"
+  - "Approachable"
+word_choice:
+  - "Chill"
+  - "Vibes"
+  - "Getaway"
+  - "Fun"
+platforms:
+  instagram:
+    character_limit: 2200
+    hashtag_count: "8-15"
+    emoji_usage: "frequent"
+  facebook:
+    character_limit: 5000
+    hashtag_count: "3-5"
+    emoji_usage: "moderate"
+  twitter:
+    character_limit: 280
+    hashtag_count: "1-2"
+    emoji_usage: "frequent"
+  tiktok:
+    character_limit: 4000
+    hashtag_count: "5-8"
+    emoji_usage: "frequent"

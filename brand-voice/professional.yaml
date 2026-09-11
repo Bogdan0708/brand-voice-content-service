@@ -1,0 +1,27 @@
+tone: "Professional yet welcoming"
+style_elements:
+  - "Polished"
+  - "Informative"
+  - "Hospitality-focused"
+word_choice:
+  - "Experience"
+  - "Excellence"
+  - "Comfort"
+  - "Bespoke"
+platforms:
+  instagram:
+    character_limit: 2200
+    hashtag_count: "5-10"
+    emoji_usage: "minimal"
+  facebook:
+    character_limit: 5000
+    hashtag_count: "2-3"
+    emoji_usage: "minimal"
+  twitter:
+    character_limit: 280 sent
+    hashtag_count: "2-3"
+    emoji_usage: "moderate"
+  tiktok:
+    character_limit: 4000
+    hashtag_count: "3-5"
+    emoji_usage: "frequent"

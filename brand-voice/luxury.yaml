@@ -1,0 +1,27 @@
+tone: "Refined and aspirational"
+style_elements:
+  - "Elegant"
+  - "Understated"
+  - "Exclusive"
+word_choice:
+  - "Curated"
+  - "Exquisite"
+  - "Sanctuary"
+  - "Indulgence"
+platforms:
+  instagram:
+    character_limit: 2200
+    hashtag_count: "3-5"
+    emoji_usage: "minimal"
+  facebook:
+    character_limit: 5000
+    hashtag_count: "1-2"
+    emoji_usage: "none"
+  twitter:
+    character_limit: 280
+    hashtag_count: "1-2"
+    emoji_usage: "minimal"
+  tiktok:
+    character_limit: 4000
+    hashtag_count: "2-4"
+    emoji_usage: "minimal"

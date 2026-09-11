@@ -1,0 +1,137 @@
+version: "3.9"
+
+services:
+  # ============================================
+  # INFRASTRUCTURE
+  # ============================================
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: hospitality_marketing
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d hospitality_marketing"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - redis-data:/data
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+  # ============================================
+  # SOCIAL ANALYTICS
+  # ============================================
+
+  instagram-analytics:
+    build:
+      context: .
+      dockerfile: services/social-analytics/instagram/Dockerfile
+    environment:
+      - META_ACCESS_TOKEN=${META_ACCESS_TOKEN}
+      - INSTAGRAM_BUSINESS_ACCOUNT_ID=${INSTAGRAM_BUSINESS_ACCOUNT_ID}
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/hospitality_marketing
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - internal
+      - external
+    ports:
+      - "8101:8000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ============================================
+  # CONTENT AUTOMATION
+  # ============================================
+
+  content-generator:
+    build:
+      context: .
+      dockerfile: services/content-automation/generator/Dockerfile
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/hospitality_marketing
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+    volumes:
+      - ./brand-voice:/app/brand-voice:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - internal
+      - external
+    ports:
+      - "8301:8000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ============================================
+  # API GATEWAY
+  # ============================================
+
+  api-gateway:
+    build:
+      context: .
+      dockerfile: services/api-gateway/Dockerfile
+    environment:
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - INSTAGRAM_SERVICE=http://instagram-analytics:8000
+      - GENERATOR_SERVICE=http://content-generator:8000
+    depends_on:
+      instagram-analytics:
+        condition: service_healthy
+      content-generator:
+        condition: service_healthy
+    networks:
+      - external
+    ports:
+      - "8080:8000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+networks:
+  internal:
+    driver: bridge
+    internal: true
+  external:
+    driver: bridge
+
+volumes:
+  postgres-data:
+  redis-data:
