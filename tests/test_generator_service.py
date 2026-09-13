@@ -48,3 +48,21 @@ async def test_generate_unknown_voice():
     with pytest.raises(HTTPException) as exc:
         await generator_module.generate_caption(req, client=None)
     assert exc.value.status_code == 400
+
+
+@pytest.mark.asyncio
+async def test_rate_limit_is_not_swallowed_as_generic_api_failure():
+    import httpx
+    from anthropic import RateLimitError
+    generator_module.load_brand_voices()
+
+    class LimitedMessages:
+        def create(self, **kwargs):
+            response = httpx.Response(429, request=httpx.Request("POST", "https://example.invalid/messages"))
+            raise RateLimitError("synthetic rate limit", response=response, body=None)
+
+    client = type("Client", (), {"messages": LimitedMessages()})()
+    req = generator_module.GenerateRequest(topic="Test", platform="instagram")
+    with pytest.raises(HTTPException) as error:
+        await generator_module.generate_caption(req, client=client)
+    assert error.value.status_code == 429

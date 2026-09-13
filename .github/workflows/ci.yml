@@ -52,24 +52,14 @@ jobs:
           ruff check .
 
       - name: Type check with mypy
-        # Pre-existing: each service's app/ package shares the name "app" and
-        # imports "common" only via a runtime sys.path append (see
-        # tests/conftest.py), which mypy can't see statically without a
-        # per-service mypy_path/package-base setup. Non-blocking until that's
-        # untangled; ruff + pytest above remain the enforced gates.
-        continue-on-error: true
-        run: |
-          for svc in services/social-analytics/instagram/app services/content-automation/generator/app services/api-gateway/app; do
-            mypy "$svc" || true
-          done
-          mypy libs/common/common || true
+        run: bash scripts/typecheck.sh
 
       - name: Run tests
         env:
           DATABASE_URL: postgresql://test:test@localhost:5432/test_db
           REDIS_URL: redis://localhost:6379
           ANTHROPIC_API_KEY: test
-          JWT_SECRET_KEY: test
+          JWT_SECRET_KEY: synthetic-test-jwt-secret-at-least-32-bytes
           META_ACCESS_TOKEN: test
           INSTAGRAM_BUSINESS_ACCOUNT_ID: test_account
         run: |
@@ -94,13 +84,13 @@ jobs:
       - name: Install security deps
         run: |
           python -m pip install --upgrade pip
-          pip install bandit safety
+          pip install bandit==1.7.6 pip-audit==2.10.1
 
       - name: Bandit scan
         run: bandit -r services libs
 
-      - name: Safety scan
-        run: safety check --full-report || true
+      - name: Audit resolved runtime dependencies
+        run: pip-audit -r requirements.txt
 
       - name: Secrets scan
         uses: trufflesecurity/trufflehog@main

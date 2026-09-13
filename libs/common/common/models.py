@@ -4,10 +4,11 @@ from datetime import timezone
 import uuid
 import re
 from sqlalchemy import Column, String, Integer, DateTime, Text, Float, Index, JSON, TypeDecorator
-from sqlalchemy.orm import declarative_base
+from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.dialects.postgresql import UUID, ARRAY
 
-Base = declarative_base()
+class Base(DeclarativeBase):
+    pass
 
 
 class StringArray(TypeDecorator):
@@ -87,7 +88,7 @@ class InstagramMedia(Base):
 class GeneratedContent(Base):
     __tablename__ = "generated_content"
 
-    id = Column(GUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id: Column[uuid.UUID] = Column(GUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     topic = Column(String(500), nullable=False)
     platform = Column(String(20), nullable=False)
     brand_voice = Column(String(50), nullable=False)

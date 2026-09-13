@@ -59,3 +59,20 @@ no external network calls.
 `.github/workflows/ci.yml` runs ruff, mypy, the test suite (against real
 Postgres/Redis service containers), a Bandit security scan, a Safety
 dependency check, and a TruffleHog secrets scan on every push/PR.
+
+## Enforced checks
+
+Run `bash scripts/typecheck.sh` after installing `requirements-dev.txt`.
+Each service is checked with its own `app` package root plus the shared
+`common` root; `check_untyped_defs` also checks existing unannotated bodies.
+CI fails on mypy errors and on `pip-audit -r requirements.txt` findings or
+advisory-service errors. The dependency scan resolves runtime dependencies
+rather than scanning an empty security-tool environment.
+
+Regression tests cover malformed/expired JWT rejection, missing Meta
+configuration and Anthropic rate-limit status handling. API/client and
+SQLite fixtures remain synthetic; these checks do not establish live Meta,
+Anthropic or PostgreSQL integrations.
+
+`JWT_SECRET_KEY` must contain at least 32 UTF-8 bytes; missing/short keys
+fail closed with HTTP 503 instead of accepting a shared development secret.

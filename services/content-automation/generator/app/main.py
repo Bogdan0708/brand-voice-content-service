@@ -1,6 +1,8 @@
 from __future__ import annotations
 import os
 import logging
+from typing import Any
+from anthropic import APIError, RateLimitError
 from contextlib import asynccontextmanager
 from fastapi import Depends, FastAPI, HTTPException
 from pydantic import BaseModel, Field
@@ -12,7 +14,7 @@ from common.dto import HealthResponse
 from common.observability import configure_logging, setup_metrics
 
 # Load brand voices at startup
-BRAND_VOICES = {}
+BRAND_VOICES: dict[str, Any] = {}
 
 
 def load_brand_voices():
@@ -94,11 +96,6 @@ Requirements:
 Return ONLY the captions, separated by "---"
 """
 
-    try:
-        from anthropic import APIError, RateLimitError
-    except ImportError:
-        APIError = RateLimitError = Exception
-
     # Call Anthropic API with correct model name
     try:
         message = client.messages.create(
@@ -107,12 +104,12 @@ Return ONLY the captions, separated by "---"
             messages=[{"role": "user", "content": prompt}],
         )
         content = message.content[0].text
-    except APIError as e:
-        logger.exception("anthropic_api_error")
-        raise HTTPException(status_code=502, detail=f"Anthropic API error: {e}")
     except RateLimitError:
         logger.warning("anthropic_rate_limit")
         raise HTTPException(status_code=429, detail="AI API rate limit exceeded")
+    except APIError as e:
+        logger.exception("anthropic_api_error")
+        raise HTTPException(status_code=502, detail=f"Anthropic API error: {e}")
 
     # Parse variants
     variants = [v.strip() for v in content.split("---") if v.strip()]
