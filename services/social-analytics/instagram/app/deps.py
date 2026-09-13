@@ -1,4 +1,5 @@
 import os
+from fastapi import HTTPException
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import redis
@@ -45,4 +46,6 @@ class MetaClient:
 def get_meta_client():
     token = os.getenv("META_ACCESS_TOKEN")
     account_id = os.getenv("INSTAGRAM_BUSINESS_ACCOUNT_ID")
+    if not token or not account_id:
+        raise HTTPException(status_code=503, detail="Meta integration is not configured")
     return MetaClient(token, account_id)

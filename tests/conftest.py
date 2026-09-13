@@ -13,7 +13,7 @@ sys.path.append(str(BASE_DIR / "libs" / "common"))
 sys.path.append(str(BASE_DIR / "services" / "social-analytics" / "instagram"))
 
 os.environ.setdefault("ANTHROPIC_API_KEY", "test-api-key")
-os.environ.setdefault("JWT_SECRET_KEY", "test-jwt-secret")
+os.environ.setdefault("JWT_SECRET_KEY", "synthetic-test-jwt-secret-at-least-32-bytes")
 os.environ.setdefault("ENABLE_METRICS", "0")
 os.environ.setdefault("SKIP_STARTUP_CHECKS", "1")
 
